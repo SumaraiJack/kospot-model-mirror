@@ -1,12 +1,17 @@
 # kospot-model-mirror
 
-A private copy of the four on-device AI models the KosPot app downloads for Aura.
+The four on-device AI models the KosPot app downloads for Aura.
 
-This repo exists for one reason: **insurance.** The app fetches these files from
-someone else's GitHub releases. If that project ever deletes a release, renames a
-tag, or disappears, every KosPot user loses the ability to install Aura's voice
-and ears. These copies mean the app can be repointed in an afternoon instead of
-losing the feature.
+**This is where the KosPot app downloads them from.** It is not a backup any
+more — it is the live source.
+
+It exists because the app used to fetch these files from someone else's GitHub
+releases. A project that deletes a release, renames a tag, or disappears would
+have taken Aura's voice and ears with it, for every user, with no warning. Now
+the files sit somewhere under our own control.
+
+The upstream project is still the ORIGIN of every file, and still gets the
+credit — see `NOTICE.md`.
 
 Nothing here is modified. Every file is a byte-for-byte copy of the upstream
 release, renamed so it is obvious what it is for.
@@ -57,32 +62,27 @@ sha256sum -c SHA256SUMS
 
 ---
 
-## THE CATCH — read before repointing the app at this repo
+## This repo is public, on purpose
 
-**A private repo's release assets cannot be downloaded without a GitHub token.**
+It has to be. The app downloads with a plain unauthenticated `GET` (see
+`auraDownloadFile` in `lib/aura/aura_voice_pack.dart`), and a **private** repo's
+release assets return `404` to anyone without a GitHub token. Putting a token
+inside an APK is not an option — anyone can unzip an APK and read it, and that
+token would carry `repo` scope over the whole account.
 
-The app downloads with a plain unauthenticated `GET` (see `auraDownloadFile` in
-`lib/aura/aura_voice_pack.dart`). Pointed at a private release, every user would
-get a `404`, and the app would correctly report "the server refused the download
-(404)".
+So the repo was made public and the app now points here. Verified: an
+unauthenticated `GET` on every one of the four assets returns `200 OK` with the
+correct byte count.
 
-Putting a token in the app to fix that is not an option. Anyone can unzip an APK
-and read it, and that token would have `repo` scope on the whole account.
+Redistribution is allowed. Every licence was read from the archives themselves,
+not assumed — see `NOTICE.md`. Two of the four (MIT) and one (Apache 2.0) are
+permissive; the Piper voice is **CC BY-SA 4.0** and carries a condition worth
+understanding before anything is adapted from it. `NOTICE.md` spells that out.
 
-So this repo is a **vault, not a CDN.** To actually serve from it you must first
-do one of:
+## Cost
 
-1. **Make the repo public.** Simplest. These are permissively licensed models
-   (each archive carries its own `LICENSE`) — check each one still allows
-   redistribution before doing this.
-2. **Put the files somewhere public you own** — Supabase Storage, R2,
-   Cloudflare Pages — and point the app there. Costs money in egress; roughly
-   100 MB per user who installs a voice.
-
-Either way, the change in the app is small: the URLs in
-`lib/aura/aura_voice_pack.dart` and `lib/aura/aura_listen_pack.dart`.
-
----
+Nothing. GitHub does not bill for release-asset bandwidth, and these are served
+from its CDN rather than from the repo itself.
 
 ## What must stay true if these are ever swapped
 
